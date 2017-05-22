@@ -10,6 +10,7 @@ var buildVar = require('./ast-builders/variable');
 var buildResolver = require('./ast-builders/resolver');
 var buildFieldWrapperFunction = require('./ast-builders/field-wrapper-function');
 var enumRegex = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
+const lcfirst = require('locutus/php/strings/lcfirst');
 
 var typeMap = {
     id: 'GraphQLID',
@@ -47,6 +48,9 @@ function generateTypes(data, opts) {
         var fields = [], refs;
 
         for (var fieldName in model.fields) {
+            if (fieldName.match(/^\d+$/)) {
+                continue;
+            }
             fields.push(generateField(model.fields[fieldName], null, name, model));
 
             refs = where(model.references, { refField: fieldName });
@@ -67,7 +71,7 @@ function generateTypes(data, opts) {
 
         var typeDeclaration = b.objectExpression([
             b.property('init', b.identifier('name'), b.literal(name)),
-            generateDescription(model.description),
+            b.property('init', b.identifier('sqlTable'), b.literal(lcfirst(name))),
             b.property(
                 'init',
                 b.identifier('fields'),
