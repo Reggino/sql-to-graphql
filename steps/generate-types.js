@@ -135,11 +135,18 @@ function generateTypes(data, opts) {
             description += ' (reference)';
         }
 
+        console.log(b.newExpression(
+            b.identifier('getType'),
+            [b.literal(refersTo.model.name)]
+        ));
+        process.exit(1);
+
         return generateField({
             name: refersTo.field,
             description: description,
-            resolve: buildResolver(refersTo.model, refField.originalName)
-        }, b.callExpression(
+            sqlJoin: (customerTable, personTable, args) => `${customerTable}.personId = ${personTable}.id`
+            // resolve: buildResolver(refersTo.model, refField.originalName)
+        }, b.newExpression(
             b.identifier('getType'),
             [b.literal(refersTo.model.name)]
         ));
